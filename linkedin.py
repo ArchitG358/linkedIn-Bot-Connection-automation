@@ -16,8 +16,8 @@ sleep(1)
 email = driver.find_element_by_id('username')
 passsword = driver.find_element_by_id('password')
 
-email.send_keys("architgaur25@gmail.com")
-passsword.send_keys("3qYv@r_*XhmF,$!")
+email.send_keys("email")
+passsword.send_keys("password")
 driver.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "mercado-button--primary", " " ))]').click()
 sleep(1)
 
