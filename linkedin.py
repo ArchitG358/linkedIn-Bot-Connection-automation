@@ -1,49 +1,64 @@
 from selenium import webdriver
 from time import sleep
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
 
-driver = webdriver.Chrome(executable_path=r'chromedriver.exe')
+def login():
+    driver.get(login_url)
+    sleep(2)
+
+    # Setting up login details
+    email_element = driver.find_element_by_id('username')
+    password_element = driver.find_element_by_id('password')
+    # Sending Input in the field
+    email_element.send_keys(email)
+    password_element.send_keys(password)
+
+    # Submitting the login request
+    driver.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "mercado-button--primary", " " ))]').click()
 
 
-login_url = "https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin"
-driver.get(login_url)
-sleep(1)
-email = driver.find_element_by_id('username')
-passsword = driver.find_element_by_id('password')
-
-email.send_keys("email")
-passsword.send_keys("password")
-driver.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "mercado-button--primary", " " ))]').click()
-sleep(1)
-
-network_url = "https://www.linkedin.com/mynetwork/"
-driver.get(network_url)
-sleep(5)
+def open_networks():
+    driver.get(network_url)
+    driver.maximize_window()
 
 
-button_elements = driver.find_elements_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "artdeco-button__text", " " ))]')
+def send_requests():
+    flag = 1
+    while flag:
+        # Getting all button elements
+        button_elements = driver.find_elements_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "artdeco-button__text", " " ))]')
+        for i in button_elements:
+            if i.text == 'Connect':
+                try:
+                    i.click()
+                    print("Connection Request send")
+                except:
+                    print("Skipped")
+                sleep(1)
 
-count = 1
+        # Scroll down the page and refresh the button list
+        driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        sleep(2.5)
+        # stopping condition to be added
+        # flag = 0
 
-print(len(button_elements))
-while True:
-    button_elements = driver.find_elements_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "artdeco-button__text", " " ))]')
-    for i in button_elements:
-        print(count)
-        if i.text == 'Connect':
-            try:
-                i.click()
-                print("Connection Request send to : ")
-            except:
-                print("Skipped")
-            sleep(2)
-        count += 1
-    driver.execute_script("window.scrollTo(0, 1080)")
+
+if __name__ == '__main__':
+    login_url = "https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin"
+    network_url = "https://www.linkedin.com/mynetwork/"
+
+    # Taking user input to set credentials
+    email = input("Enter your email: ")
+    password = input("Enter your password: ")
+
+    # Invalid credential conditions to be added.
+
+    driver = webdriver.Chrome(executable_path=r'chromedriver.exe')
+    login()
     sleep(5)
 
-driver.close()
+    open_networks()
+    sleep(5)
+
+    send_requests()
+    print("Done for today")
