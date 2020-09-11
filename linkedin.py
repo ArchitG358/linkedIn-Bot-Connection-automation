@@ -1,5 +1,6 @@
 from selenium import webdriver
 from time import sleep
+from selenium.common.exceptions import NoSuchElementException
 
 
 def login():
@@ -17,6 +18,33 @@ def login():
     driver.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "mercado-button--primary", " " ))]').click()
 
 
+def check_password():
+    try:
+        error = driver.find_element_by_id("error-for-password")
+        if "Hmm, that's not the right password" in error.text:
+            print("Wrong Password")
+            return 0
+        elif "Password must be 6 characters or more" in error.text:
+            print("Short Password")
+            return 0
+    except NoSuchElementException:
+        return 1
+    else:
+        return 0
+
+
+def check_email():
+    # To be completed.
+    return 1
+
+
+def check_credentials():
+    if check_password and check_email:
+        return 1
+    else:
+        return 0
+
+
 def open_networks():
     driver.get(network_url)
     driver.maximize_window()
@@ -24,6 +52,7 @@ def open_networks():
 
 def send_requests():
     flag = 1
+    count_skipped = 0
     while flag:
         # Getting all button elements
         button_elements = driver.find_elements_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "artdeco-button__text", " " ))]')
@@ -34,13 +63,14 @@ def send_requests():
                     print("Connection Request send")
                 except:
                     print("Skipped")
+                    count_skipped += 1
+                    if count_skipped == 4:
+                        flag = 0
                 sleep(1)
 
         # Scroll down the page and refresh the button list
         driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         sleep(2.5)
-        # stopping condition to be added
-        # flag = 0
 
 
 if __name__ == '__main__':
@@ -51,14 +81,22 @@ if __name__ == '__main__':
     email = input("Enter your email: ")
     password = input("Enter your password: ")
 
-    # Invalid credential conditions to be added.
-
+    # Driver running
     driver = webdriver.Chrome(executable_path=r'chromedriver.exe')
+
+    # Calling the login function
     login()
-    sleep(5)
 
-    open_networks()
-    sleep(5)
+    # wrong email check condition is left.
 
-    send_requests()
-    print("Done for today")
+    # Check for correct password
+    if check_credentials():
+        sleep(5)
+        open_networks()
+        sleep(5)
+        send_requests()
+        driver.quit()
+        print("Done for today")
+    else:
+        driver.quit()
+        print("Retry with correct password")
