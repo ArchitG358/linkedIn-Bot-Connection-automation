@@ -76,8 +76,10 @@ def send_requests():
                     if count_skipped == 4:
                         flag = 0
                 sleep(1)
-            if requests <= 50:
-                break
+            if requests >= 50:
+                 break
+        if requests >= 50:
+            break
 
         # Scroll down the page and refresh the button list
         driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
@@ -97,7 +99,7 @@ def visibilty(company_name):
     while True:
         number -= 10
         try:
-            
+
             driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
             sleep(2.5)
         except WebDriverException:
@@ -120,11 +122,15 @@ def visibilty(company_name):
 
 
 def get_visibility():
+    links = []
     list_links = driver.find_elements_by_xpath("//div[@class='discover-entity-type-card__info-container']//a")
-    for j in list_links[0:50]:
-        driver.get(j.get_attribute('href'))
-        print("Profile visited ")
-        sleep(2)
+    for j in list_links:
+        list.append(j.get_attribute('href'))
+
+    for j in links:
+        driver.get(j)
+        print("Profile visited ", j)
+        sleep(10)
 
 
 if __name__ == '__main__':
