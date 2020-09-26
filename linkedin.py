@@ -131,6 +131,22 @@ def get_visibility():
         sleep(10)
 
 
+def connection_withdrawer():
+    driver.get("https://www.linkedin.com/mynetwork/invitation-manager/sent")
+    sleep(10)
+    c = driver.find_elements_by_xpath("//*[@class='invitation-card__action-btn artdeco-button artdeco-button--muted artdeco-button--3 artdeco-button--tertiary ember-view']")
+    page_number = 1
+    print(len(c))
+    while len(c) > 0:
+        for i in c:
+            sleep(2)
+            driver.execute_script("arguments[0].click();", i)
+            sleep(2)
+            driver.find_element_by_xpath("//*[@class='artdeco-modal__confirm-dialog-btn artdeco-button artdeco-button--2 artdeco-button--primary ember-view']").click()
+            sleep(2)
+            c = driver.find_elements_by_xpath("//*[@class='invitation-card__action-btn artdeco-button artdeco-button--muted artdeco-button--3 artdeco-button--tertiary ember-view']")
+
+
 if __name__ == '__main__':
     login_url = "https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin"
     network_url = "https://www.linkedin.com/mynetwork/"
@@ -155,6 +171,7 @@ if __name__ == '__main__':
         print("1. Send connection request+ profile visiting")
         print("2. Only Connection Requests")
         print("3. Visit company personel Profiles")
+        print("4 Sent Invitations Withdrawer")
         choice = int(input("Enter Your Choice:"))
         if choice == 1:
             no_of_requests = int(input("Enter Number Of connection rquests and profile visit you want to make:"))
@@ -169,6 +186,8 @@ if __name__ == '__main__':
         elif choice == 3:
             company = input("Enter Company Name")
             visibilty(company)
+        elif choice == 4:
+            connection_withdrawer()
         else:
             print("Wrong Option Thanks")
         driver.quit()
