@@ -76,9 +76,9 @@ def send_requests():
                     if count_skipped == 4:
                         flag = 0
                 sleep(1)
-            if requests >= 50:
-                 break
-        if requests >= 50:
+            if requests >= no_of_requests:
+                break
+        if requests >= no_of_requests:
             break
 
         # Scroll down the page and refresh the button list
@@ -125,9 +125,9 @@ def get_visibility():
     links = []
     list_links = driver.find_elements_by_xpath("//div[@class='discover-entity-type-card__info-container']//a")
     for j in list_links:
-        list.append(j.get_attribute('href'))
-
-    for j in links:
+        links.append(j.get_attribute('href'))
+    print(links)
+    for j in links[0:no_of_requests]:
         driver.get(j)
         print("Profile visited ", j)
         sleep(10)
@@ -159,6 +159,7 @@ if __name__ == '__main__':
         print("3. Visit company personel Profiles")
         choice = int(input("Enter Your Choice:"))
         if choice == 1:
+            no_of_requests = int(input("Enter Number Of connection rquests and profile visit you want to make:"))
             open_networks()
             sleep(5)
             send_requests()
