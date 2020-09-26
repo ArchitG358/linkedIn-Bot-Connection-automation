@@ -92,7 +92,6 @@ def visibilty(company_name):
     sleep(2)
 
     number = driver.find_element_by_xpath("//*[@class='t-20 t-black']")
-    print(number.text)
     c = number.text
     print("Total", c)
     number = int(input("Enter Number Of profiles you want to visit:"))
@@ -111,7 +110,7 @@ def visibilty(company_name):
     for i in links_list:
         list.append(i.get_attribute('href'))
 
-    for i in list:
+    for i in list[0:number]:
         print(i)
         sleep(2)
         try:
@@ -126,7 +125,6 @@ def get_visibility():
     list_links = driver.find_elements_by_xpath("//div[@class='discover-entity-type-card__info-container']//a")
     for j in list_links:
         links.append(j.get_attribute('href'))
-    print(links)
     for j in links[0:no_of_requests]:
         driver.get(j)
         print("Profile visited ", j)
