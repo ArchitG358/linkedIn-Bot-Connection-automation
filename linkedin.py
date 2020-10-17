@@ -1,6 +1,6 @@
 from selenium import webdriver
 from time import sleep
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException
 
 
 def login():
@@ -15,7 +15,8 @@ def login():
     password_element.send_keys(password)
 
     # Submitting the login request
-    driver.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "mercado-button--primary", " " ))]').click()
+    driver.find_element_by_xpath(
+        '//*[contains(concat( " ", @class, " " ), concat( " ", "mercado-button--primary", " " ))]').click()
 
 
 def check_password():
@@ -53,24 +54,97 @@ def open_networks():
 def send_requests():
     flag = 1
     count_skipped = 0
+    requests = 0
     while flag:
         # Getting all button elements
-        button_elements = driver.find_elements_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "artdeco-button__text", " " ))]')
+        button_elements = driver.find_elements_by_xpath(
+            '//*[contains(concat( " ", @class, " " ), concat( " ", "artdeco-button__text", " " ))]')
         for i in button_elements:
             if i.text == 'Connect':
                 try:
                     i.click()
                     print("Connection Request send")
+                    requests += 1
                 except:
-                    print("Skipped")
+                    print("Skipped", count_skipped)
+                    try:
+                        driver.find_element_by_class_name(
+                            "artdeco-button ip-fuse-limit-alert__primary-action artdeco-button--2 artdeco-button--primary ember-view").click()
+                    except NoSuchElementException:
+                        pass
                     count_skipped += 1
                     if count_skipped == 4:
                         flag = 0
                 sleep(1)
+            if requests >= no_of_requests:
+                break
+        if requests >= no_of_requests:
+            break
 
         # Scroll down the page and refresh the button list
         driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         sleep(2.5)
+
+
+def visibilty(company_name):
+    driver.get("https://www.linkedin.com/company/" + company_name + "/people/")
+    list = []
+    sleep(2)
+
+    number = driver.find_element_by_xpath("//*[@class='t-20 t-black']")
+    c = number.text
+    print("Total", c)
+    number = int(input("Enter Number Of profiles you want to visit:"))
+    while True:
+        number -= 10
+        try:
+
+            driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+            sleep(2.5)
+        except WebDriverException:
+            break
+        if number < 0:
+            break
+
+    links_list = driver.find_elements_by_xpath("//*[@class='ember-view link-without-visited-state']")
+    for i in links_list:
+        list.append(i.get_attribute('href'))
+
+    for i in list[0:number]:
+        print(i)
+        sleep(2)
+        try:
+            driver.get(i)
+            print("visited", i)
+        except WebDriverException:
+            break
+
+
+def get_visibility():
+    links = []
+    list_links = driver.find_elements_by_xpath("//div[@class='discover-entity-type-card__info-container']//a")
+    for j in list_links:
+        links.append(j.get_attribute('href'))
+    for j in links[0:no_of_requests]:
+        driver.get(j)
+        print("Profile visited ", j)
+        sleep(10)
+
+
+def connection_withdrawer():
+    driver.get("https://www.linkedin.com/mynetwork/invitation-manager/sent")
+    sleep(10)
+    c = driver.find_elements_by_xpath("//*[@class='invitation-card__action-btn artdeco-button artdeco-button--muted artdeco-button--3 artdeco-button--tertiary ember-view']")
+    page_number = 1
+    print(len(c))
+    while len(c) > 0:
+        for i in c:
+            sleep(2)
+            driver.execute_script("arguments[0].click();", i)
+            sleep(2)
+            driver.find_element_by_xpath("//*[@class='artdeco-modal__confirm-dialog-btn artdeco-button artdeco-button--2 artdeco-button--primary ember-view']").click()
+            sleep(2)
+            c = driver.find_elements_by_xpath("//*[@class='invitation-card__action-btn artdeco-button artdeco-button--muted artdeco-button--3 artdeco-button--tertiary ember-view']")
 
 
 if __name__ == '__main__':
@@ -82,7 +156,8 @@ if __name__ == '__main__':
     password = input("Enter your password: ")
 
     # Driver running
-    driver = webdriver.Chrome(executable_path=r'chromedriver.exe')
+    driver = webdriver.Chrome(
+        executable_path=r'C:\Users\aishk\Downloads\Compressed\payroll-scrapers-master\payroll-scrapers-master\era_nlp\verifiers\swiggy_selenium_new\chromedriver_win32_2\chromedriver.exe')
 
     # Calling the login function
     login()
@@ -92,9 +167,29 @@ if __name__ == '__main__':
     # Check for correct password
     if check_credentials():
         sleep(5)
-        open_networks()
-        sleep(5)
-        send_requests()
+        print("What do you want to do")
+        print("1. Send connection request+ profile visiting")
+        print("2. Only Connection Requests")
+        print("3. Visit company personel Profiles")
+        print("4 Sent Invitations Withdrawer")
+        choice = int(input("Enter Your Choice:"))
+        if choice == 1:
+            no_of_requests = int(input("Enter Number Of connection rquests and profile visit you want to make:"))
+            open_networks()
+            sleep(5)
+            send_requests()
+            get_visibility()
+        elif choice == 2:
+            open_networks()
+            sleep(5)
+            send_requests()
+        elif choice == 3:
+            company = input("Enter Company Name")
+            visibilty(company)
+        elif choice == 4:
+            connection_withdrawer()
+        else:
+            print("Wrong Option Thanks")
         driver.quit()
         print("Done for today")
     else:
